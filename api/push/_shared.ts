@@ -41,7 +41,7 @@ export async function sendPush(subscription: PushSubscription, msg: PushMessage,
     await webpush.sendNotification(subscription, JSON.stringify(msg), {
       TTL: 60 * 60,
       urgency: "high",
-      vapidDetails: { subject: "https://june-empieza.vercel.app", ...keys },
+      vapidDetails: { subject: "https://blu-june.vercel.app", ...keys },
     });
     return "ok";
   } catch (e) {

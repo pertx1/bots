@@ -52,6 +52,8 @@ export function normalize(input: unknown): AppData {
       ...base.settings,
       ...(d.settings ?? {}),
       reminders: { ...base.settings.reminders, ...(d.settings?.reminders ?? {}) },
+      // El mono se llama Blu, punto.
+      petName: "Blu",
       freeTime:
         Array.isArray(d.settings?.freeTime) && d.settings.freeTime.length === 7 ? d.settings.freeTime : base.settings.freeTime,
     },

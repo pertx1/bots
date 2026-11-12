@@ -71,10 +71,6 @@ function SettingsBody() {
           <span className="mb-1 block font-bold">Nombre</span>
           <input className={inputCls} value={s.name} onChange={(e) => store.setSettings({ name: e.target.value })} />
         </label>
-        <label className="block">
-          <span className="mb-1 block font-bold">Nombre de tu mono 🐒</span>
-          <input className={inputCls} maxLength={20} value={s.petName} onChange={(e) => store.setSettings({ petName: e.target.value })} />
-        </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="mb-1 block font-bold">Hora de estudio</span>

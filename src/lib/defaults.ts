@@ -50,7 +50,7 @@ export function createDefaultData(): AppData {
     version: 1,
     settings: {
       name: "June",
-      petName: "Coco",
+      petName: "Blu",
       freeTime: DEFAULT_FREE_TIME,
       studyTime: "13:30",
       tidyTime: "19:30",

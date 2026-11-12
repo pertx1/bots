@@ -64,7 +64,7 @@ select cron.schedule(
   '* * * * *',
   $cron$
     select net.http_post(
-      url := 'https://june-empieza.vercel.app/api/push/send',
+      url := 'https://june-empieza.vercel.app/api/push/send', -- cambiado a blu-june en 0004
       headers := jsonb_build_object(
         'Content-Type', 'application/json',
         'x-cron-secret', (select value from private.config where key = 'cron_secret')

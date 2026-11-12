@@ -21,7 +21,7 @@ const at = (day: string, hhmm: string, deltaMin = 0) => {
  */
 export function buildReminders(d: AppData, days = 7): Reminder[] {
   const s = d.settings;
-  const pet = s.petName || "Coco";
+  const pet = s.petName || "Blu";
   const now = Date.now();
   const today = todayKey();
   const out: Reminder[] = [];
