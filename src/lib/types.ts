@@ -1,3 +1,5 @@
+import type { TimerId } from "./methods";
+
 export type Energy = 1 | 2 | 3;
 export type Zone = "habitacion" | "ropa" | "escritorio";
 export type SoundKind = "none" | "white" | "brown" | "rain";
@@ -80,12 +82,16 @@ export interface ParkedThought {
 
 export interface Settings {
   name: string;
+  /** Cómo le habla la app: en femenino o en masculino. */
+  gender: "f" | "m";
   /** Cómo se llama su mono. */
   petName: string;
   /** Horas libres por día de la semana (0 = domingo … 6 = sábado). */
   freeTime: FreeSlot[];
   studyTime: string; // "HH:MM"
   tidyTime: string;
+  /** Temporizador elegido (pomodoro, 52/17…) o «libre» si ajustó los minutos a mano. */
+  method: TimerId;
   focusMinutes: number;
   breakMinutes: number;
   reminders: {

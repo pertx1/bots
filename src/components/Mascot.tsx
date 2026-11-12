@@ -3,7 +3,7 @@ import { addDays, todayKey } from "@/lib/dates";
 
 export type Mood = "eufórica" | "contenta" | "tranqui" | "aburrida";
 
-/** El mono de June, nunca riñe: como mucho se aburre y te invita a jugar. */
+/** Blu, el mono, nunca riñe: como mucho se aburre y te invita a jugar. */
 export function mascotMood(d: AppData): { mood: Mood; line: string } {
   const n = d.settings.petName || "Blu";
   const t = todayKey();

@@ -13,6 +13,7 @@ import {
   UNDERSTAND_EMOJI,
   UNDERSTAND_LABELS,
 } from "@/lib/planner";
+import { gx } from "@/lib/gender";
 import { useStore } from "@/lib/store";
 import type { FreeSlot, Level } from "@/lib/types";
 import { useUI } from "./app-ui";
@@ -323,7 +324,7 @@ function PlanForm({ onDone }: { onDone: () => void }) {
                 {sched.status === "ok"
                   ? "Ritmo tranqui: como mucho 50 min al día. Sin agobios 😌"
                   : sched.status === "justa"
-                    ? `Vas un poco justa: algunos días toca hasta ${fmtMin(sched.maxPerDay)}. Se puede 💪`
+                    ? `Vas un poco ${gx(store.data.settings, "justa", "justo")}: algunos días toca hasta ${fmtMin(sched.maxPerDay)}. Se puede 💪`
                     : `No cabe todo en tus horas libres (faltan ${fmtMin(sched.totalMinutes - sched.scheduledMinutes)}). Añade horas o céntrate en lo más importante.`}
               </p>
               <div className="no-scrollbar -mx-1 mt-3 flex gap-2 overflow-x-auto px-1 pb-1">

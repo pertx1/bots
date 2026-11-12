@@ -5,11 +5,13 @@ import { useRef, useState } from "react";
 import { isStandalone } from "@/lib/notify";
 import { SOUND_LABELS } from "@/lib/sound";
 import { isAppData } from "@/lib/storage";
+import { gx } from "@/lib/gender";
 import { useStore } from "@/lib/store";
 import type { ReminderLevel, SoundKind } from "@/lib/types";
 import { useUI } from "./app-ui";
 import { FreeTimeEditor } from "./Exams";
 import { InstallGuide } from "./InstallGuide";
+import { TimerPicker } from "./Methods";
 import { NotificationsCard } from "./NotificationsCard";
 import { Button, inputCls, Sheet, Toggle } from "./ui";
 
@@ -44,7 +46,7 @@ function SettingsBody() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `june-copia-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `blu-copia-${new Date().toISOString().slice(0, 10)}.json`;
     document.body.appendChild(a);
     a.click();
     a.remove();
@@ -60,7 +62,7 @@ function SettingsBody() {
       store.replaceAll(json);
       ui.toast("¡Datos importados! ✨", "mint");
     } catch {
-      ui.toast("Ese archivo no parece una copia de June 🤔", "sun");
+      ui.toast("Ese archivo no parece una copia de Blu 🤔", "sun");
     }
   };
 
@@ -71,6 +73,26 @@ function SettingsBody() {
           <span className="mb-1 block font-bold">Nombre</span>
           <input className={inputCls} value={s.name} onChange={(e) => store.setSettings({ name: e.target.value })} />
         </label>
+        <div>
+          <p className="mb-1 font-bold">Cómo te hablo</p>
+          <div className="grid grid-cols-2 gap-2">
+            {(
+              [
+                ["f", "En femenino"],
+                ["m", "En masculino"],
+              ] as const
+            ).map(([g, label]) => (
+              <button
+                key={g}
+                aria-pressed={s.gender === g}
+                onClick={() => store.setSettings({ gender: g })}
+                className={`min-h-12 rounded-2xl font-bold ${s.gender === g ? "bg-azul-600 text-white" : "bg-white text-azul-700"}`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="mb-1 block font-bold">Hora de estudio</span>
@@ -101,8 +123,24 @@ function SettingsBody() {
       </Group>
 
       <Group title="Foco">
-        <Stepper label="Bloque de estudio" value={s.focusMinutes} min={10} max={60} step={5} onChange={(v) => store.setSettings({ focusMinutes: v })} />
-        <Stepper label="Descanso" value={s.breakMinutes} min={3} max={15} step={1} onChange={(v) => store.setSettings({ breakMinutes: v })} />
+        <TimerPicker />
+        <p className="pt-1 text-sm font-bold">O a tu medida:</p>
+        <Stepper
+          label="Bloque de estudio"
+          value={s.focusMinutes}
+          min={10}
+          max={90}
+          step={5}
+          onChange={(v) => store.setSettings({ focusMinutes: v, method: "libre" })}
+        />
+        <Stepper
+          label="Descanso"
+          value={s.breakMinutes}
+          min={3}
+          max={20}
+          step={1}
+          onChange={(v) => store.setSettings({ breakMinutes: v, method: "libre" })}
+        />
         <div>
           <p className="mb-2 font-bold">Sonido de fondo</p>
           <div className="flex flex-wrap gap-2">
@@ -182,7 +220,7 @@ function SettingsBody() {
           className="w-full"
           onClick={() => {
             if (!confirm("¿Borrar TODO? Tareas, rachas, misiones… no se puede deshacer.")) return;
-            if (!confirm("¿Segurísima? 🥺")) return;
+            if (!confirm(`¿${gx(s, "Segurísima", "Segurísimo")}? 🥺`)) return;
             store.resetAll();
             ui.setSettingsOpen(false);
           }}
@@ -190,7 +228,7 @@ function SettingsBody() {
           <Trash2 className="h-5 w-5" /> Borrar todo
         </Button>
       </Group>
-      <p className="pb-2 text-center text-xs text-ink-soft">Hecha con 💙 para June</p>
+      <p className="pb-2 text-center text-xs text-ink-soft">Hecha con 💙 (y con June en mente)</p>
     </div>
   );
 }

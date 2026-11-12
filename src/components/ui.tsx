@@ -144,7 +144,17 @@ export function Pill({ children, className = "" }: { children: React.ReactNode; 
   );
 }
 
-export function Toggle({ checked, onChange, label }: { checked: boolean; onChange: (v: boolean) => void; label: string }) {
+export function Toggle({
+  checked,
+  onChange,
+  label,
+  dark = false,
+}: {
+  checked: boolean;
+  onChange: (v: boolean) => void;
+  label: string;
+  dark?: boolean;
+}) {
   return (
     <button
       role="switch"
@@ -153,7 +163,11 @@ export function Toggle({ checked, onChange, label }: { checked: boolean; onChang
       className="flex min-h-12 w-full items-center justify-between gap-3 py-1 text-left font-semibold"
     >
       <span>{label}</span>
-      <span className={`relative h-8 w-14 shrink-0 rounded-full transition ${checked ? "bg-azul-600" : "bg-azul-100"}`}>
+      <span
+        className={`relative h-8 w-14 shrink-0 rounded-full transition ${
+          checked ? (dark ? "bg-mint" : "bg-azul-600") : dark ? "bg-white/25" : "bg-azul-100"
+        }`}
+      >
         <span
           className={`absolute top-1 h-6 w-6 rounded-full bg-white shadow transition-all ${checked ? "left-7" : "left-1"}`}
         />

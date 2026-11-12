@@ -6,6 +6,8 @@ import { COMEBACK, DONE_CHEERS, randomFrom } from "@/lib/copy";
 import { confetti } from "@/lib/confetti";
 import { chime, startSound, stopSound } from "@/lib/sound";
 import { nextStep, useStore } from "@/lib/store";
+import { gx } from "@/lib/gender";
+import { timerById } from "@/lib/methods";
 import { blockMinutes, type FocusConfig, useUI } from "./app-ui";
 import { Mascot } from "./Mascot";
 import { Button, inputCls } from "./ui";
@@ -307,7 +309,10 @@ function DoneScreen({ cfg, exits }: { cfg: FocusConfig; exits: number }) {
   const nextBlock = blockMinutes(cfg.energy, s.focusMinutes);
   const recent = data.sessions.filter((x) => x.kind === "focus").slice(-8, -1);
   const avgExits = recent.length ? recent.reduce((n, x) => n + x.exits, 0) / recent.length : null;
-  const suggestMore = cfg.kind === "focus" && s.blocksInARow >= 3 && s.focusMinutes < 50;
+  const timer = timerById(s.method);
+  const longBreak = cfg.kind === "focus" && !!timer?.every && s.blocksInARow > 0 && s.blocksInARow % timer.every === 0;
+  const breakMin = longBreak ? timer!.longBreak! : s.breakMinutes;
+  const suggestMore = cfg.kind === "focus" && !timer?.every && s.blocksInARow >= 3 && s.focusMinutes < 50;
 
   const startBlock = (minutes = nextBlock) => ui.startFocus({ kind: "focus", minutes, taskId: cfg.taskId, energy: cfg.energy });
 
@@ -333,7 +338,7 @@ function DoneScreen({ cfg, exits }: { cfg: FocusConfig; exits: number }) {
           <h2 className="font-display mt-4 text-4xl font-extrabold">¡Bloque completado!</h2>
           <p className="mt-2 text-lg opacity-90">
             {exits === 0
-              ? "Y sin salir de la app ni una vez. Reina. 👑"
+              ? `Y sin salir de la app ni una vez. ${gx(s, "Reina", "Crack")}. 👑`
               : avgExits !== null && exits < avgExits
                 ? `Solo ${exits} ${exits === 1 ? "salida" : "salidas"}: menos que tu media. ¡Mejorando!`
                 : `${exits} ${exits === 1 ? "salida" : "salidas"}. La próxima, No molestar y a por el 0.`}
@@ -342,7 +347,7 @@ function DoneScreen({ cfg, exits }: { cfg: FocusConfig; exits: number }) {
             <div className="mt-5 w-full rounded-3xl bg-white/15 p-4">
               <p className="font-bold">Llevas {s.blocksInARow} bloques seguidos 🔥 ¿Subimos a {s.focusMinutes + 5} min?</p>
               <div className="mt-3 flex gap-2">
-                <Button variant="sun" className="flex-1" onClick={() => setSettings({ focusMinutes: s.focusMinutes + 5, blocksInARow: 0 })}>
+                <Button variant="sun" className="flex-1" onClick={() => setSettings({ focusMinutes: s.focusMinutes + 5, blocksInARow: 0, method: "libre" })}>
                   ¡Venga!
                 </Button>
                 <Button variant="white" className="flex-1" onClick={() => setSettings({ blocksInARow: 0 })}>
@@ -352,8 +357,8 @@ function DoneScreen({ cfg, exits }: { cfg: FocusConfig; exits: number }) {
             </div>
           )}
           <div className="mt-6 w-full space-y-3">
-            <Button variant="mint" className="w-full py-4 text-lg" onClick={() => ui.startFocus({ kind: "break", minutes: s.breakMinutes, taskId: cfg.taskId, energy: cfg.energy })}>
-              Descanso de {s.breakMinutes} min
+            <Button variant="mint" className="w-full py-4 text-lg" onClick={() => ui.startFocus({ kind: "break", minutes: breakMin, taskId: cfg.taskId, energy: cfg.energy })}>
+              {longBreak ? `¡${s.blocksInARow} pomodoros! Descanso largo de ${breakMin} min 🍅` : `Descanso de ${breakMin} min`}
             </Button>
             <Button variant="white" className="w-full" onClick={ui.endFocus}>
               Terminar por hoy

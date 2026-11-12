@@ -49,11 +49,13 @@ export function createDefaultData(): AppData {
   return {
     version: 1,
     settings: {
-      name: "June",
+      name: "",
+      gender: "f",
       petName: "Blu",
       freeTime: DEFAULT_FREE_TIME,
       studyTime: "13:30",
       tidyTime: "19:30",
+      method: "pomodoro",
       focusMinutes: 25,
       breakMinutes: 5,
       reminders: { study: true, tidy: true, exams: true, streak: true },

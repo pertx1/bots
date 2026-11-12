@@ -1,13 +1,15 @@
-/** Frases de la app: tono amiga graciosa, en femenino, español de España. */
+/** Frases de la app: tono de colega gracios@, español de España, en femenino o masculino. */
 
 const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
-export function greeting(name: string, hour = new Date().getHours()): { hello: string; line: string } {
+export function greeting(rawName: string, masc = false, hour = new Date().getHours()): { hello: string; line: string } {
+  const name = rawName.trim();
+  const hi = (base: string, end = "!") => (name ? `${base}, ${name}${end}` : `${base}${end}`);
   if (hour < 6)
-    return { hello: `¿${name}? ¿Despierta a estas horas?`, line: "Lo mejor que puedes hacer ahora es dormir. En serio. Mañana arrasamos." };
+    return { hello: name ? `¿${name}? ¿${masc ? "Despierto" : "Despierta"} a estas horas?` : `¿${masc ? "Despierto" : "Despierta"} a estas horas?`, line: "Lo mejor que puedes hacer ahora es dormir. En serio. Mañana arrasamos." };
   if (hour < 12)
     return {
-      hello: `¡Buenos días, ${name}! ☀️`,
+      hello: `${hi("¡Buenos días")} ☀️`,
       line: pick([
         "Hoy no hace falta hacerlo todo. Solo empezar.",
         "Café, colacao o lo que sea. Y luego 5 minutitos.",
@@ -16,7 +18,7 @@ export function greeting(name: string, hour = new Date().getHours()): { hello: s
     };
   if (hour < 16)
     return {
-      hello: `¡Hola, ${name}! 🌞`,
+      hello: `${hi("¡Hola")} 🌞`,
       line: pick([
         "Es mediodía: tu superpoder. Ahora rindes como nunca.",
         "Hora punta de tu cerebro. ¿La aprovechamos?",
@@ -25,15 +27,15 @@ export function greeting(name: string, hour = new Date().getHours()): { hello: s
     };
   if (hour < 21)
     return {
-      hello: `¡Buenas tardes, ${name}! 🌇`,
+      hello: `${hi("¡Buenas tardes")} 🌇`,
       line: pick([
-        "¿Llegas cansada? Normal. 5 minutos y decides.",
+        masc ? "¿Llegas cansado? Normal. 5 minutos y decides." : "¿Llegas cansada? Normal. 5 minutos y decides.",
         "Pequeñito y hecho > perfecto y sin empezar.",
         "La silla de la ropa te está mirando 👀",
       ]),
     };
   return {
-    hello: `¡Buenas noches, ${name}! 🌙`,
+    hello: `${hi("¡Buenas noches")} 🌙`,
     line: pick([
       "Un mini paso y a descansar. Trato hecho.",
       "Prepara la mesa para mañana y tu yo del futuro te hará una estatua.",

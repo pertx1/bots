@@ -15,13 +15,13 @@ const body = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "June · Empieza",
+  title: "Blu · Empieza",
   description: "Tu app para empezar a estudiar, concentrarte y recoger sin agobios.",
   manifest: "/manifest.json",
-  applicationName: "June",
+  applicationName: "Blu",
   appleWebApp: {
     capable: true,
-    title: "June",
+    title: "Blu",
     statusBarStyle: "default",
   },
   formatDetection: { telephone: false },

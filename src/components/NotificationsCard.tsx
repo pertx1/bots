@@ -102,7 +102,7 @@ export function NotificationsCard({ compact = false }: { compact?: boolean }) {
           if (r === "ok") {
             setOn(true);
             ui.toast("¡Avisos activados! En un minuto te llega uno de prueba 🎉", "mint");
-          } else if (r === "denied") ui.toast("Sin permiso no puedo avisarte. Actívalo en Ajustes del iPhone → Notificaciones → June.", "sun");
+          } else if (r === "denied") ui.toast("Sin permiso no puedo avisarte. Actívalo en Ajustes del iPhone → Notificaciones → Blu.", "sun");
           else if (r === "server-off") setServer(false);
           else ui.toast("Algo ha fallado. Prueba otra vez en un ratito.", "sun");
         }}

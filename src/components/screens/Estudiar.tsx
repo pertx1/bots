@@ -16,10 +16,12 @@ import {
 import { useState } from "react";
 import { breakDown, KIND_HINT } from "@/lib/breakdown";
 import { addDays, daysBetween, relativeDay, todayKey, uid } from "@/lib/dates";
+import { timerById } from "@/lib/methods";
 import { canMarkImportant, nextStep, useStore } from "@/lib/store";
 import type { Step, Task } from "@/lib/types";
 import { useUI } from "../app-ui";
 import { ExamCalendar, PlanCard, PlanSheet } from "../Exams";
+import { Techniques, TimerPicker } from "../Methods";
 import { Button, DoneCheck, inputCls, Pill, SectionTitle } from "../ui";
 
 export function Estudiar() {
@@ -51,12 +53,22 @@ export function Estudiar() {
           onClick={() => ui.openPreFocus({ kind: "focus", taskId: active[0]?.id })}
         >
           <Play className="h-6 w-6" fill="currentColor" />
-          <span className="font-display text-xl font-extrabold leading-none">Bloque {data.settings.focusMinutes}′</span>
+          <span className="font-display text-xl font-extrabold leading-none">
+            {timerById(data.settings.method)?.emoji ?? "⏱️"} {data.settings.focusMinutes}′
+          </span>
           <span className="text-xs font-semibold opacity-80">+ {data.settings.breakMinutes}′ de descanso</span>
         </Button>
       </div>
 
       <Unblocker />
+
+      <SectionTitle>Métodos de estudio</SectionTitle>
+      <div className="card p-4">
+        <p className="mb-3 font-bold">⏱️ Tu temporizador</p>
+        <TimerPicker />
+      </div>
+      <p className="mb-3 mt-5 px-1 font-bold">🧠 Técnicas para estudiar mejor</p>
+      <Techniques />
 
       <SectionTitle action={<Pill className="bg-azul-100 text-azul-700">{active.length}</Pill>}>Tus tareas</SectionTitle>
       {active.length === 0 ? (

@@ -2,10 +2,11 @@
 
 import { BarChart3, BookOpen, Home, Settings, Sparkles } from "lucide-react";
 import { useEffect } from "react";
-import { useRawStore, useStore } from "@/lib/store";
+import { useRawStore } from "@/lib/store";
 import { type Tab, UIProvider, useUI } from "./app-ui";
 import { FocusOverlay } from "./FocusOverlay";
 import { MissionSheet } from "./MissionSheet";
+import { Mascot } from "./Mascot";
 import { Onboarding } from "./Onboarding";
 import { PreFocusSheet } from "./PreFocusSheet";
 import { Estudiar } from "./screens/Estudiar";
@@ -32,10 +33,10 @@ export function App() {
   }, []);
 
   if (!raw.data) return <Splash />;
-  if (!raw.data.settings.onboarded) return <Onboarding />;
   return (
     <UIProvider>
-      <Main />
+      {raw.data.settings.onboarded ? <Main /> : <Onboarding />}
+      <Toasts />
     </UIProvider>
   );
 }
@@ -43,14 +44,13 @@ export function App() {
 function Splash() {
   return (
     <div className="flex min-h-dvh items-center justify-center bg-azul-600">
-      <span className="font-display animate-pop text-5xl font-extrabold text-white">June</span>
+      <span className="font-display animate-pop text-5xl font-extrabold text-white">Blu</span>
     </div>
   );
 }
 
 function Main() {
   const ui = useUI();
-  const { data } = useStore();
   useReminders();
   usePushSync();
 
@@ -59,8 +59,8 @@ function Main() {
       <header className="pt-safe sticky top-0 z-30 bg-paper/85 backdrop-blur-md">
         <div className="mx-auto flex max-w-lg items-center justify-between px-4 pb-2">
           <button onClick={() => ui.setTab("hoy")} className="font-display flex min-h-11 items-center gap-2 text-2xl font-extrabold text-azul-600">
-            <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-azul-600 text-lg text-white">J</span>
-            {data.settings.name || "June"}
+            <Mascot mood="contenta" size={40} className="!animate-none" name="Blu" />
+            Blu
           </button>
           <button
             onClick={() => ui.setSettingsOpen(true)}
@@ -100,23 +100,31 @@ function Main() {
         </div>
       </nav>
 
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[70] flex flex-col items-center gap-2 px-4 pt-[max(env(safe-area-inset-top),12px)]" aria-live="polite">
-        {ui.toasts.map((t) => (
-          <div
-            key={t.id}
-            className={`animate-slide-up pointer-events-auto max-w-md rounded-2xl px-4 py-3 text-center font-bold shadow-xl ${
-              t.tone === "mint" ? "bg-mint text-ink" : t.tone === "sun" ? "bg-sun text-ink" : "bg-azul-600 text-white"
-            }`}
-          >
-            {t.text}
-          </div>
-        ))}
-      </div>
-
       <PreFocusSheet />
       <MissionSheet />
       <SettingsSheet />
       <FocusOverlay />
+    </div>
+  );
+}
+
+function Toasts() {
+  const ui = useUI();
+  return (
+    <div
+      className="pointer-events-none fixed inset-x-0 top-0 z-[70] flex flex-col items-center gap-2 px-4 pt-[max(env(safe-area-inset-top),12px)]"
+      aria-live="polite"
+    >
+      {ui.toasts.map((t) => (
+        <div
+          key={t.id}
+          className={`animate-slide-up pointer-events-auto max-w-md rounded-2xl px-4 py-3 text-center font-bold shadow-xl ${
+            t.tone === "mint" ? "bg-mint text-ink" : t.tone === "sun" ? "bg-sun text-ink" : "bg-azul-600 text-white"
+          }`}
+        >
+          {t.text}
+        </div>
+      ))}
     </div>
   );
 }

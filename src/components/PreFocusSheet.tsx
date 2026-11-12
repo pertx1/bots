@@ -6,13 +6,14 @@ import { FIVE_MIN_PROMISES, randomFrom } from "@/lib/copy";
 import { SOUND_LABELS, unlockAudio } from "@/lib/sound";
 import { nextStep, useStore } from "@/lib/store";
 import type { Energy, SoundKind } from "@/lib/types";
+import { gx } from "@/lib/gender";
 import { blockMinutes, useUI } from "./app-ui";
 import { Button, Sheet } from "./ui";
 
-const FACES: { e: Energy; emoji: string; label: string; hint: string }[] = [
-  { e: 1, emoji: "🫠", label: "Fundida", hint: "bloques cortitos" },
-  { e: 2, emoji: "😐", label: "Normalita", hint: "bloque medio" },
-  { e: 3, emoji: "🤩", label: "¡A tope!", hint: "bloque completo" },
+const FACES: { e: Energy; emoji: string; label: [string, string]; hint: string }[] = [
+  { e: 1, emoji: "🫠", label: ["Fundida", "Fundido"], hint: "bloques cortitos" },
+  { e: 2, emoji: "😐", label: ["Normalita", "Normalito"], hint: "bloque medio" },
+  { e: 3, emoji: "🤩", label: ["¡A tope!", "¡A tope!"], hint: "bloque completo" },
 ];
 
 export function PreFocusSheet() {
@@ -60,7 +61,7 @@ function PreFocusBody() {
               }`}
             >
               <span className={`text-4xl ${energy === f.e ? "animate-pop" : ""}`}>{f.emoji}</span>
-              <span className="mt-1 text-sm font-bold">{f.label}</span>
+              <span className="mt-1 text-sm font-bold">{gx(data.settings, f.label[0], f.label[1])}</span>
               <span className="text-[11px] text-ink-soft">{f.hint}</span>
             </button>
           ))}

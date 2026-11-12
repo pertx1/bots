@@ -1,6 +1,6 @@
-# June · Empieza
+# Blu · Empieza
 
-PWA para ayudar a June a **empezar** a estudiar, concentrarse y recoger.
+PWA (hecha pensando en June, pero para cualquiera) que ayuda a **empezar** a estudiar, concentrarse y recoger.
 Next.js (App Router, export estático) + TypeScript + Tailwind CSS v4. Sin backend: los datos viven en el
 dispositivo (`localStorage`) detrás de una capa de almacenamiento (`src/lib/storage.ts`) lista para cambiar a Supabase.
 

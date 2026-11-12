@@ -16,7 +16,7 @@ import { Button, DoneCheck, inputCls, Pill, SectionTitle } from "../ui";
 export function Hoy() {
   const { data, addTask, setTaskDone } = useStore();
   const ui = useUI();
-  const [g] = useState(() => greeting(data.settings.name));
+  const [g] = useState(() => greeting(data.settings.name, data.settings.gender === "m"));
   const [newImp, setNewImp] = useState("");
 
   const today = todayKey();
