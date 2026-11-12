@@ -1,4 +1,4 @@
-import type { AppData, Mission, Zone } from "./types";
+import type { AppData, FreeSlot, Mission, Zone } from "./types";
 
 export const ZONES: { id: Zone; label: string; emoji: string; color: string }[] = [
   { id: "ropa", label: "La silla de la ropa", emoji: "👀", color: "bg-pink" },
@@ -34,11 +34,24 @@ export const DEFAULT_MISSIONS: Mission[] = [
   m("h6", "habitacion", "Saca la basura de la papelera", 2),
 ];
 
+// Domingo a sábado. Entre semana después de clase; el finde, a mediodía (su mejor hora).
+export const DEFAULT_FREE_TIME: FreeSlot[] = [
+  { start: "12:30", minutes: 90 },
+  { start: "16:30", minutes: 90 },
+  { start: "16:30", minutes: 90 },
+  { start: "16:30", minutes: 90 },
+  { start: "16:30", minutes: 90 },
+  { start: "16:30", minutes: 60 },
+  { start: "12:30", minutes: 60 },
+];
+
 export function createDefaultData(): AppData {
   return {
     version: 1,
     settings: {
       name: "June",
+      petName: "Coco",
+      freeTime: DEFAULT_FREE_TIME,
       studyTime: "13:30",
       tidyTime: "19:30",
       focusMinutes: 25,

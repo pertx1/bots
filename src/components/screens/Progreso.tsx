@@ -34,8 +34,8 @@ export function Progreso() {
 
       <section className="card relative mt-4 overflow-hidden p-5 text-center">
         <div className="absolute inset-x-0 top-0 h-28 bg-linear-to-b from-azul-100 to-transparent" aria-hidden />
-        <Mascot mood={mood} size={150} className="relative mx-auto" />
-        <p className="font-display relative mt-1 text-lg font-bold">Blu</p>
+        <Mascot mood={mood} size={150} className="relative mx-auto" name={data.settings.petName} />
+        <p className="font-display relative mt-1 text-lg font-bold">{data.settings.petName}</p>
         <p className="relative mx-auto mt-1 max-w-xs text-ink-soft">{line}</p>
       </section>
 

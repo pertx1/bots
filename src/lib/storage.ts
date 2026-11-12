@@ -52,9 +52,13 @@ export function normalize(input: unknown): AppData {
       ...base.settings,
       ...(d.settings ?? {}),
       reminders: { ...base.settings.reminders, ...(d.settings?.reminders ?? {}) },
+      freeTime:
+        Array.isArray(d.settings?.freeTime) && d.settings.freeTime.length === 7 ? d.settings.freeTime : base.settings.freeTime,
     },
     tasks: Array.isArray(d.tasks) ? d.tasks : [],
-    plans: Array.isArray(d.plans) ? d.plans : [],
+    plans: Array.isArray(d.plans)
+      ? d.plans.map((p) => ({ ...p, amount: p.amount ?? 3, understanding: p.understanding ?? 3, totalMinutes: p.totalMinutes ?? 0 }))
+      : [],
     missions: Array.isArray(d.missions) && d.missions.length ? d.missions : base.missions,
     missionLog: Array.isArray(d.missionLog) ? d.missionLog : [],
     sessions: Array.isArray(d.sessions) ? d.sessions : [],

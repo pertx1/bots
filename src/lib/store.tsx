@@ -3,9 +3,9 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { createDefaultData } from "./defaults";
 import { todayKey, uid } from "./dates";
-import { buildPlanTasks } from "./planner";
+import { BLOCK, buildPlanTasks, busyByDay, estimateMinutes, scheduleStudy } from "./planner";
 import { normalize, storage } from "./storage";
-import type { AppData, ExamPlan, FocusSession, Mission, Settings, Step, Task, Zone } from "./types";
+import type { AppData, ExamPlan, FocusSession, Level, Mission, Settings, Step, Task, Zone } from "./types";
 
 export const MAX_IMPORTANT = 3;
 
@@ -102,10 +102,27 @@ function useStoreValue() {
           return { ...d, tasks: d.tasks.map((t) => (t.id === id ? { ...t, important: !t.important } : t)) };
         }),
 
-      addPlan: (title: string, examDate: string, topics: string[]) =>
+      addPlan: (input: { title: string; examDate: string; topics: string[]; amount: Level; understanding: Level }) =>
         update((d) => {
-          const plan: ExamPlan = { id: uid(), title, examDate, topics, createdAt: new Date().toISOString() };
-          return { ...d, plans: [...d.plans, plan], tasks: [...d.tasks, ...buildPlanTasks(plan)] };
+          const plan: ExamPlan = {
+            id: uid(),
+            createdAt: new Date().toISOString(),
+            totalMinutes: estimateMinutes(input.amount, input.understanding),
+            ...input,
+          };
+          const sched = scheduleStudy(plan.totalMinutes, plan.examDate, d.settings.freeTime, busyByDay(d));
+          return { ...d, plans: [...d.plans, plan], tasks: [...d.tasks, ...buildPlanTasks(plan, sched.sessions)] };
+        }),
+      /** Vuelve a repartir lo que falta (p. ej. si cambió sus horas libres o se saltó días). */
+      recalcPlan: (id: string) =>
+        update((d) => {
+          const plan = d.plans.find((p) => p.id === id);
+          if (!plan) return d;
+          const doneMin = d.tasks.filter((t) => t.planId === id && t.done).reduce((n, t) => n + (t.minutes ?? 0), 0);
+          const kept = d.tasks.filter((t) => t.planId !== id || t.done);
+          const left = Math.max(BLOCK, plan.totalMinutes - doneMin);
+          const sched = scheduleStudy(left, plan.examDate, d.settings.freeTime, busyByDay({ ...d, tasks: kept }, id));
+          return { ...d, tasks: [...kept, ...buildPlanTasks(plan, sched.sessions)] };
         }),
       deletePlan: (id: string) =>
         update((d) => ({
@@ -191,7 +208,10 @@ export function tasksForToday(d: AppData): Task[] {
   const t = todayKey();
   return d.tasks
     .filter((x) => !x.done && (x.date === t || (x.date < t && !!x.planId) || (x.date < t && x.important)))
-    .sort((a, b) => Number(b.important) - Number(a.important) || a.date.localeCompare(b.date));
+    .sort(
+      (a, b) =>
+        a.date.localeCompare(b.date) || Number(b.important) - Number(a.important) || (a.time ?? "99").localeCompare(b.time ?? "99"),
+    );
 }
 
 export function nextMission(d: AppData, zone?: Zone): Mission | undefined {

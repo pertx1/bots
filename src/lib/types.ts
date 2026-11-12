@@ -16,6 +16,10 @@ export interface Task {
   steps: Step[];
   /** Día para el que está planificada (YYYY-MM-DD). */
   date: string;
+  /** Hora de empezar (HH:MM) si viene del plan de exámenes. */
+  time?: string;
+  /** Minutos previstos para la sesión. */
+  minutes?: number;
   important: boolean;
   done: boolean;
   doneAt?: string;
@@ -23,12 +27,25 @@ export interface Task {
   planId?: string;
 }
 
+export type Level = 1 | 2 | 3 | 4 | 5;
+
 export interface ExamPlan {
   id: string;
   title: string;
   examDate: string;
   topics: string[];
   createdAt: string;
+  /** Cuánto temario (1 poquito – 5 un montón). */
+  amount: Level;
+  /** Cuánto lo entiende (1 ni idea – 5 lo domina). */
+  understanding: Level;
+  totalMinutes: number;
+}
+
+/** Horas libres de un día de la semana. */
+export interface FreeSlot {
+  start: string; // "HH:MM"
+  minutes: number; // 0 = ese día no estudia
 }
 
 export interface Mission {
@@ -63,6 +80,10 @@ export interface ParkedThought {
 
 export interface Settings {
   name: string;
+  /** Cómo se llama su mono. */
+  petName: string;
+  /** Horas libres por día de la semana (0 = domingo … 6 = sábado). */
+  freeTime: FreeSlot[];
   studyTime: string; // "HH:MM"
   tidyTime: string;
   focusMinutes: number;

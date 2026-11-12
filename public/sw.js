@@ -58,7 +58,7 @@ self.addEventListener("fetch", (event) => {
   );
 });
 
-/* ---- v2: notificaciones push desde servidor ---- */
+/* ---- Notificaciones push desde el servidor (api/push) ---- */
 self.addEventListener("push", (event) => {
   let data = { title: "June", body: "¡5 minutitos y decides!" };
   try {
@@ -67,6 +67,7 @@ self.addEventListener("push", (event) => {
   event.waitUntil(
     self.registration.showNotification(data.title, {
       body: data.body,
+      tag: data.tag || undefined,
       icon: "/icons/icon-192.png",
       badge: "/icons/icon-192.png",
     }),

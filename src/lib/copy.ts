@@ -54,7 +54,7 @@ export const DONE_CHEERS = [
   "Una menos. Eres una máquina.",
   "¡Bum! Hecho.",
   "Esto merece un bailecito.",
-  "Blu está dando volteretas.",
+  "Tu mono está dando volteretas 🐒",
 ];
 
 export const COMEBACK = [

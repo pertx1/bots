@@ -13,7 +13,7 @@ import { Hoy } from "./screens/Hoy";
 import { Orden } from "./screens/Orden";
 import { Progreso } from "./screens/Progreso";
 import { SettingsSheet } from "./SettingsSheet";
-import { useReminders } from "./useReminders";
+import { usePushSync, useReminders } from "./useReminders";
 
 const TABS: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "hoy", label: "Hoy", icon: Home },
@@ -52,6 +52,7 @@ function Main() {
   const ui = useUI();
   const { data } = useStore();
   useReminders();
+  usePushSync();
 
   return (
     <div className="min-h-dvh">

@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react";
 import { daysBetween, minutesOfDay, nowMinutes, relativeDay, todayKey } from "@/lib/dates";
 import { systemNotify } from "@/lib/notify";
+import { pushEnabledHere, syncPush } from "@/lib/push";
 import { computeStreak } from "@/lib/streak";
 import { useStore } from "@/lib/store";
 import { useUI } from "./app-ui";
@@ -32,10 +33,22 @@ export function useReminders() {
         if (sent(k)) return false;
         store.markNotified(k);
         ui.toast(`${title} ${body}`, "sun");
-        void systemNotify(title, body);
+        // Si hay push, el aviso del sistema ya llega desde el servidor
+        if (!pushEnabledHere()) void systemNotify(title, body);
         return true;
       };
       const studiedToday = d.sessions.some((s) => s.date === t);
+
+      // Sesiones del plan de exámenes de hoy
+      if (d.settings.reminders.study) {
+        d.tasks
+          .filter((x) => x.planId && !x.done && x.date === t && x.time)
+          .forEach((x) => {
+            const startAt = minutesOfDay(x.time!);
+            if (now >= startAt - 10 && now < startAt) fire(`pre-${x.id}`, "📚 En 10 min te toca:", x.title);
+            else if (now >= startAt && now < startAt + 60) fire(`go-${x.id}`, "⏰ ¡Ahora!", `${x.title} · ${x.minutes} min`);
+          });
+      }
 
       // Hora de estudiar (+ insistencia si «muchos»)
       if (d.settings.reminders.study && !studiedToday) {
@@ -44,7 +57,7 @@ export function useReminders() {
           if (!fire("study", "¡Es tu hora buena! ☀️", "Solo 5 minutos y decides. Venga, que tú puedes.")) {
             const nudges = level === "muchos" ? 3 : level === "normal" ? 1 : 0;
             for (let i = 1; i <= nudges; i++) {
-              if (now >= at + i * 45 && fire(`study-${i}`, "Blu sigue aquí 👀", "5 minutitos. Abrir los apuntes ya cuenta.")) break;
+              if (now >= at + i * 45 && fire(`study-${i}`, `${d.settings.petName} sigue aquí 👀`, "5 minutitos. Abrir los apuntes ya cuenta.")) break;
             }
           }
         }
@@ -85,4 +98,13 @@ export function useReminders() {
       document.removeEventListener("visibilitychange", onVis);
     };
   }, []);
+}
+
+/** Manda al servidor la lista de próximos avisos cuando cambian los datos. */
+export function usePushSync() {
+  const { data } = useStore();
+  useEffect(() => {
+    const id = setTimeout(() => void syncPush(data), 3000);
+    return () => clearTimeout(id);
+  }, [data]);
 }

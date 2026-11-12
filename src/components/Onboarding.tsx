@@ -15,6 +15,7 @@ export function Onboarding() {
   const { data, setSettings } = useStore();
   const [step, setStep] = useState(0);
   const [name, setName] = useState(data.settings.name);
+  const [pet, setPet] = useState(data.settings.petName);
   const [study, setStudy] = useState(data.settings.studyTime);
   const [tidy, setTidy] = useState(data.settings.tidyTime);
   const [installed] = useState(() => isStandalone());
@@ -33,12 +34,21 @@ export function Onboarding() {
             <Mascot mood="eufórica" size={170} className="mx-auto" />
             <h1 className="font-display mt-6 text-5xl font-extrabold leading-[1.02]">¡Hola, {name || "June"}!</h1>
             <p className="mt-4 text-lg text-azul-50">
-              Soy <b className="text-white">Blu</b>. Mi trabajo: que <b className="text-white">empieces</b> (aunque sea 5 minutos) y saber
+              Soy <b className="text-white">{pet || "tu mono"}</b>, tu mono. Mi trabajo: que <b className="text-white">empieces</b> (aunque sea 5 minutos) y saber
               siempre <b className="text-white">por dónde empezar</b>. Sin agobios y sin sermones, palabrita.
             </p>
             <label className="mt-6 block">
               <span className="mb-1 block text-sm font-bold text-azul-50">¿Cómo te llamo?</span>
               <input className={`${inputCls} !border-white/30 !bg-white !text-ink`} value={name} onChange={(e) => setName(e.target.value)} />
+            </label>
+            <label className="mt-3 block">
+              <span className="mb-1 block text-sm font-bold text-azul-50">¿Y cómo quieres que se llame tu mono? 🐒</span>
+              <input
+                className={`${inputCls} !border-white/30 !bg-white !text-ink`}
+                value={pet}
+                maxLength={20}
+                onChange={(e) => setPet(e.target.value)}
+              />
             </label>
           </div>
         )}
@@ -101,7 +111,14 @@ export function Onboarding() {
             className="w-full py-4 text-lg"
             onClick={() => {
               if (step < 2) setStep(step + 1);
-              else setSettings({ name: name.trim() || "June", studyTime: study, tidyTime: tidy, onboarded: true });
+              else
+                setSettings({
+                  name: name.trim() || "June",
+                  petName: pet.trim() || "Coco",
+                  studyTime: study,
+                  tidyTime: tidy,
+                  onboarded: true,
+                });
             }}
           >
             {step === 0 ? "¡Vamos allá!" : step === 1 ? (installed ? "Siguiente" : "Hecho (o luego)") : "¡Empezar!"}

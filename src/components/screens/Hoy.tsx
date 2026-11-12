@@ -10,6 +10,7 @@ import { computeStreak } from "@/lib/streak";
 import { canMarkImportant, MAX_IMPORTANT, nextMission, nextStep, tasksForToday, todayProgress, useStore } from "@/lib/store";
 import { useUI } from "../app-ui";
 import { Mascot, mascotMood } from "../Mascot";
+import { NotificationsCard } from "../NotificationsCard";
 import { Button, DoneCheck, inputCls, Pill, SectionTitle } from "../ui";
 
 export function Hoy() {
@@ -87,6 +88,11 @@ export function Hoy() {
             {nextTask ? (
               <>
                 <p className="truncate font-bold">{nextTask.title}</p>
+                {nextTask.time && nextTask.date === today && (
+                  <p className="text-sm font-bold text-azul-700">
+                    A las {nextTask.time} · {nextTask.minutes} min
+                  </p>
+                )}
                 <p className="line-clamp-2 text-sm text-ink-soft">{step?.text ?? "Último repaso"}</p>
               </>
             ) : (
@@ -120,6 +126,10 @@ export function Hoy() {
         )}
       </div>
 
+      <div className="mt-3">
+        <NotificationsCard compact />
+      </div>
+
       {planToday.length > 0 && (
         <>
           <SectionTitle>
@@ -137,12 +147,12 @@ export function Hoy() {
                     <p className="strike font-bold" data-done={t.done}>
                       {t.title}
                     </p>
-                    {plan && (
-                      <p className="text-sm text-ink-soft">
-                        Examen {relativeDay(plan.examDate)}
-                        {t.date < today && " · se quedó de otro día"}
-                      </p>
-                    )}
+                    <p className="text-sm text-ink-soft">
+                      {t.time && t.date === today && <b className="text-azul-700">{t.time} · </b>}
+                      {t.minutes && `${t.minutes} min · `}
+                      {plan && `examen ${relativeDay(plan.examDate)}`}
+                      {t.date < today && " · se quedó de otro día"}
+                    </p>
                   </div>
                   <button
                     onClick={() => ui.openPreFocus({ kind: "focus", taskId: t.id })}

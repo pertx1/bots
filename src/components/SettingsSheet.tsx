@@ -1,14 +1,16 @@
 "use client";
 
-import { Bell, Download, Trash2, Upload } from "lucide-react";
+import { Download, Trash2, Upload } from "lucide-react";
 import { useRef, useState } from "react";
-import { askNotificationPermission, isIOS, isStandalone, notificationPermission } from "@/lib/notify";
+import { isStandalone } from "@/lib/notify";
 import { SOUND_LABELS } from "@/lib/sound";
 import { isAppData } from "@/lib/storage";
 import { useStore } from "@/lib/store";
 import type { ReminderLevel, SoundKind } from "@/lib/types";
 import { useUI } from "./app-ui";
+import { FreeTimeEditor } from "./Exams";
 import { InstallGuide } from "./InstallGuide";
+import { NotificationsCard } from "./NotificationsCard";
 import { Button, inputCls, Sheet, Toggle } from "./ui";
 
 export function SettingsSheet() {
@@ -34,7 +36,6 @@ function SettingsBody() {
   const ui = useUI();
   const s = store.data.settings;
   const file = useRef<HTMLInputElement>(null);
-  const [perm, setPerm] = useState(() => notificationPermission());
   const [showInstall, setShowInstall] = useState(false);
   const standalone = isStandalone();
 
@@ -70,6 +71,10 @@ function SettingsBody() {
           <span className="mb-1 block font-bold">Nombre</span>
           <input className={inputCls} value={s.name} onChange={(e) => store.setSettings({ name: e.target.value })} />
         </label>
+        <label className="block">
+          <span className="mb-1 block font-bold">Nombre de tu mono 🐒</span>
+          <input className={inputCls} maxLength={20} value={s.petName} onChange={(e) => store.setSettings({ petName: e.target.value })} />
+        </label>
         <div className="grid grid-cols-2 gap-3">
           <label className="block">
             <span className="mb-1 block font-bold">Hora de estudio</span>
@@ -80,6 +85,23 @@ function SettingsBody() {
             <input type="time" className={inputCls} value={s.tidyTime} onChange={(e) => store.setSettings({ tidyTime: e.target.value || "19:30" })} />
           </label>
         </div>
+      </Group>
+
+      <Group title="Horas libres para estudiar">
+        <p className="text-sm text-ink-soft">Con esto calculo cuándo empezar cada examen y a qué hora te aviso.</p>
+        <FreeTimeEditor value={s.freeTime} onChange={(freeTime) => store.setSettings({ freeTime })} />
+        {store.data.plans.length > 0 && (
+          <Button
+            variant="white"
+            className="w-full"
+            onClick={() => {
+              store.data.plans.forEach((p) => store.recalcPlan(p.id));
+              ui.toast("Exámenes recolocados con tus nuevas horas 🔄");
+            }}
+          >
+            Recolocar mis exámenes
+          </Button>
+        )}
       </Group>
 
       <Group title="Foco">
@@ -123,25 +145,7 @@ function SettingsBody() {
         <Toggle label="Exámenes cerca" checked={s.reminders.exams} onChange={(v) => store.setSettings({ reminders: { ...s.reminders, exams: v } })} />
         <Toggle label="Racha en peligro" checked={s.reminders.streak} onChange={(v) => store.setSettings({ reminders: { ...s.reminders, streak: v } })} />
 
-        <div className="rounded-2xl bg-white p-3 text-sm">
-          {perm === "granted" ? (
-            <p className="font-bold text-mint">✓ Notificaciones activadas</p>
-          ) : perm === "unsupported" || (isIOS() && !standalone) ? (
-            <p>
-              En iPhone los avisos del sistema solo funcionan con la app <b>instalada en la pantalla de inicio</b>. Mientras tanto, te aviso
-              dentro de la app cuando la tengas abierta.
-            </p>
-          ) : perm === "denied" ? (
-            <p>Las tienes bloqueadas. Actívalas en Ajustes del iPhone → Notificaciones → June.</p>
-          ) : (
-            <Button className="w-full" onClick={async () => setPerm(await askNotificationPermission())}>
-              <Bell className="h-5 w-5" /> Activar notificaciones
-            </Button>
-          )}
-          <p className="mt-2 text-ink-soft">
-            Ojo: por ahora los avisos salen cuando la app está abierta o en segundo plano reciente. Los avisos con la app cerrada llegarán en la v2.
-          </p>
-        </div>
+        <NotificationsCard />
       </Group>
 
       <Group title="Instalar en el iPhone">

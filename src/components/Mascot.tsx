@@ -3,8 +3,9 @@ import { addDays, todayKey } from "@/lib/dates";
 
 export type Mood = "eufórica" | "contenta" | "tranqui" | "aburrida";
 
-/** Blu, el mono, nunca riñe: como mucho se aburre y te invita a jugar. */
+/** El mono de June, nunca riñe: como mucho se aburre y te invita a jugar. */
 export function mascotMood(d: AppData): { mood: Mood; line: string } {
+  const n = d.settings.petName || "Coco";
   const t = todayKey();
   const todayActions =
     d.missionLog.filter((l) => l.date === t).length +
@@ -13,15 +14,15 @@ export function mascotMood(d: AppData): { mood: Mood; line: string } {
   const active = new Set(d.activeDays);
 
   if (todayActions >= 3)
-    return { mood: "eufórica", line: "¡Blu está dando volteretas de liana en liana! Hoy lo estás petando 🐒" };
-  if (active.has(t)) return { mood: "contenta", line: "Blu está feliz de verte en acción. ¿Otro poquito?" };
+    return { mood: "eufórica", line: `¡${n} está dando volteretas de liana en liana! Hoy lo estás petando 🐒` };
+  if (active.has(t)) return { mood: "contenta", line: `${n} está feliz de verte en acción. ¿Otro poquito?` };
   if (active.has(addDays(t, -1)))
-    return { mood: "tranqui", line: "Blu te ha guardado un plátano 🍌 ¿Empezamos con algo mini?" };
+    return { mood: "tranqui", line: `${n} te ha guardado un plátano 🍌 ¿Empezamos con algo mini?` };
   if (d.activeDays.length === 0)
-    return { mood: "tranqui", line: "¡Hola! Soy Blu, tu mono. Me pongo contentísimo cada vez que empiezas algo, aunque sea pequeñito." };
+    return { mood: "tranqui", line: `¡Hola! Soy ${n}, tu mono. Me pongo contentísimo cada vez que empiezas algo, aunque sea pequeñito.` };
   return {
     mood: "aburrida",
-    line: "Blu se aburre un poquito sin ti… pero sin dramas: 5 minutitos y vuelve la fiesta.",
+    line: `${n} se aburre un poquito sin ti… pero sin dramas: 5 minutitos y vuelve la fiesta.`,
   };
 }
 
@@ -29,7 +30,17 @@ const FUR = "#8eabff";
 const FACE = "#ffe2c6";
 const INK = "#0d1440";
 
-export function Mascot({ mood = "contenta", size = 120, className = "" }: { mood?: Mood; size?: number; className?: string }) {
+export function Mascot({
+  mood = "contenta",
+  size = 120,
+  className = "",
+  name = "tu mono",
+}: {
+  mood?: Mood;
+  size?: number;
+  className?: string;
+  name?: string;
+}) {
   const happy = mood === "eufórica" || mood === "contenta";
   const bored = mood === "aburrida";
   return (
@@ -39,7 +50,7 @@ export function Mascot({ mood = "contenta", size = 120, className = "" }: { mood
       height={size}
       className={`${bored ? "" : "animate-float"} ${className}`}
       role="img"
-      aria-label={`Blu, tu mono, está ${mood}`}
+      aria-label={`${name} está ${mood}`}
     >
       <ellipse cx="80" cy="152" rx="40" ry="6" fill={INK} opacity="0.12" />
 

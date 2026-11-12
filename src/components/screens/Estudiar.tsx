@@ -15,11 +15,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { breakDown, KIND_HINT } from "@/lib/breakdown";
-import { addDays, daysBetween, prettyDate, relativeDay, todayKey, uid } from "@/lib/dates";
+import { addDays, daysBetween, relativeDay, todayKey, uid } from "@/lib/dates";
 import { canMarkImportant, nextStep, useStore } from "@/lib/store";
 import type { Step, Task } from "@/lib/types";
 import { useUI } from "../app-ui";
-import { Button, DoneCheck, inputCls, Pill, SectionTitle, Sheet } from "../ui";
+import { ExamCalendar, PlanCard, PlanSheet } from "../Exams";
+import { Button, DoneCheck, inputCls, Pill, SectionTitle } from "../ui";
 
 export function Estudiar() {
   const { data } = useStore();
@@ -68,24 +69,14 @@ export function Estudiar() {
         </div>
       )}
 
-      <SectionTitle
-        action={
-          <Button variant="ghost" className="min-h-11 px-3 py-2 text-sm" onClick={() => setPlanOpen(true)}>
-            <Plus className="h-4 w-4" /> Examen
-          </Button>
-        }
-      >
+      <SectionTitle>
         <span className="flex items-center gap-2">
-          <CalendarDays className="h-5 w-5 text-azul-600" /> Exámenes y entregas
+          <CalendarDays className="h-5 w-5 text-azul-600" /> Calendario de exámenes
         </span>
       </SectionTitle>
-      {data.plans.length === 0 ? (
-        <button onClick={() => setPlanOpen(true)} className="card w-full p-5 text-left">
-          <p className="font-bold">¿Tienes examen o entrega?</p>
-          <p className="text-ink-soft">Dime la fecha y lo reparto en los días que quedan. Tú solo miras «Hoy toca…».</p>
-        </button>
-      ) : (
-        <div className="space-y-3">
+      <ExamCalendar onAdd={() => setPlanOpen(true)} />
+      {data.plans.length > 0 && (
+        <div className="mt-3 space-y-3">
           {data.plans
             .slice()
             .sort((a, b) => a.examDate.localeCompare(b.examDate))
@@ -360,113 +351,6 @@ function TaskCard({ task }: { task: Task }) {
         </div>
       )}
     </div>
-  );
-}
-
-/* ---------------- Planificador hacia atrás ---------------- */
-
-function PlanCard({ planId }: { planId: string }) {
-  const store = useStore();
-  const plan = store.data.plans.find((p) => p.id === planId)!;
-  const tasks = store.data.tasks.filter((t) => t.planId === planId).sort((a, b) => a.date.localeCompare(b.date));
-  const done = tasks.filter((t) => t.done).length;
-  const left = daysBetween(todayKey(), plan.examDate);
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="card p-4">
-      <button className="flex w-full items-center gap-3 text-left" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        <span
-          className={`flex h-14 w-14 shrink-0 flex-col items-center justify-center rounded-2xl font-extrabold ${
-            left <= 2 ? "bg-pink text-ink" : left <= 6 ? "bg-sun text-ink" : "bg-azul-100 text-azul-700"
-          }`}
-        >
-          <span className="font-display text-xl leading-none">{Math.max(0, left)}</span>
-          <span className="text-[10px] uppercase">{left === 1 ? "día" : "días"}</span>
-        </span>
-        <div className="min-w-0 flex-1">
-          <p className="font-bold">{plan.title}</p>
-          <p className="text-sm text-ink-soft">
-            {left < 0 ? "Ya pasó. ¡Espero que bordado!" : prettyDate(plan.examDate)} · {done}/{tasks.length} sesiones
-          </p>
-        </div>
-        <ChevronDown className={`h-5 w-5 text-azul-700 transition ${open ? "rotate-180" : ""}`} />
-      </button>
-      {open && (
-        <div className="animate-fade-in mt-3 space-y-1">
-          {tasks.map((t) => (
-            <div key={t.id} className="flex items-center gap-3">
-              <DoneCheck done={t.done} onToggle={() => store.setTaskDone(t.id, !t.done)} label={`Hecho: ${t.title}`} />
-              <div className="min-w-0 flex-1">
-                <p className="strike text-[15px] font-semibold" data-done={t.done}>
-                  {t.title}
-                </p>
-                <p className="text-xs text-ink-soft">{relativeDay(t.date)}</p>
-              </div>
-            </div>
-          ))}
-          <button
-            onClick={() => confirm("¿Borrar este examen y su plan?") && store.deletePlan(plan.id)}
-            className="mt-2 flex min-h-11 items-center gap-2 text-sm font-bold text-pink"
-          >
-            <Trash2 className="h-4 w-4" /> Borrar plan
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function PlanSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const store = useStore();
-  const ui = useUI();
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState(addDays(todayKey(), 7));
-  const [topics, setTopics] = useState("");
-
-  return (
-    <Sheet open={open} onClose={onClose} title="Nuevo examen o entrega">
-      <form
-        className="space-y-4"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (!title.trim() || date <= todayKey()) return;
-          const list = topics
-            .split(/[\n,;]+/)
-            .map((t) => t.trim())
-            .filter(Boolean);
-          store.addPlan(title.trim(), date, list);
-          ui.toast("¡Plan hecho! Mira «Hoy toca…» cada día y listo 📅");
-          setTitle("");
-          setTopics("");
-          onClose();
-        }}
-      >
-        <label className="block">
-          <span className="mb-1 block font-bold">¿Qué es?</span>
-          <input className={inputCls} value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ej: examen de historia" />
-        </label>
-        <label className="block">
-          <span className="mb-1 block font-bold">¿Cuándo?</span>
-          <input type="date" className={inputCls} value={date} min={addDays(todayKey(), 1)} onChange={(e) => setDate(e.target.value)} />
-        </label>
-        <label className="block">
-          <span className="mb-1 block font-bold">Temas o partes (separados por comas)</span>
-          <textarea
-            className={`${inputCls} min-h-24`}
-            value={topics}
-            onChange={(e) => setTopics(e.target.value)}
-            placeholder="Ej: tema 4, tema 5, mapas"
-          />
-        </label>
-        <p className="text-sm text-ink-soft">
-          Lo reparto hacia atrás desde la fecha: primero estudiar cada tema, luego repasos y el último día un simulacro.
-        </p>
-        <Button type="submit" className="w-full" disabled={!title.trim() || date <= todayKey()}>
-          Repártemelo
-        </Button>
-      </form>
-    </Sheet>
   );
 }
 
