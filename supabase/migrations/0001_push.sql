@@ -2,16 +2,7 @@
 -- El móvil manda sus próximos avisos a /api/push/sync (Vercel) y se guardan aquí.
 -- pg_cron llama cada minuto a /api/push/send, que reclama los avisos pendientes y los envía.
 --
--- Tras aplicar esta migración hay que guardar el secreto del cron (el mismo que CRON_SECRET en Vercel):
---   insert into private.config (key, value) values ('cron_secret', '<secreto>')
---     on conflict (key) do update set value = excluded.value;
--- y programar el cron (cambia la URL si el dominio es otro):
---   select cron.schedule('june-push', '* * * * *', $$
---     select net.http_post(
---       url := 'https://june-empieza.vercel.app/api/push/send',
---       headers := jsonb_build_object('x-cron-secret', (select value from private.config where key = 'cron_secret'))
---     )
---   $$);
+-- Las claves y el cron se configuran en 0002_push_keys_and_cron.sql.
 
 create extension if not exists pg_cron;
 create extension if not exists pg_net;

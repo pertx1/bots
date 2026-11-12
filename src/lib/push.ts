@@ -1,8 +1,6 @@
 import { buildReminders } from "./schedule";
 import type { AppData } from "./types";
 
-/** Clave pública VAPID (la privada solo vive en Vercel). */
-export const VAPID_PUBLIC_KEY = "BKhmtKCcqyWF0wGph2kokvi1_8zIBuO9hh9sqlE4NlbTPVcOfS3hVFJTd06dFHiki6vBJLU8IiedfDGWcWqftNw";
 const FLAG = "june-push-on";
 
 export function pushSupported(): boolean {
@@ -17,13 +15,20 @@ export function pushEnabledHere(): boolean {
   }
 }
 
-export async function serverPushEnabled(): Promise<boolean> {
+/** Clave pública VAPID que da el servidor (null si los avisos no están activados allí). */
+async function serverKey(): Promise<string | null> {
   try {
     const r = await fetch("/api/push/sync", { cache: "no-store" });
-    return r.ok && ((await r.json()) as { enabled?: boolean }).enabled === true;
+    if (!r.ok) return null;
+    const j = (await r.json()) as { enabled?: boolean; publicKey?: string | null };
+    return j.enabled && j.publicKey ? j.publicKey : null;
   } catch {
-    return false;
+    return null;
   }
+}
+
+export async function serverPushEnabled(): Promise<boolean> {
+  return !!(await serverKey());
 }
 
 function keyBytes(key: string) {
@@ -35,10 +40,11 @@ function keyBytes(key: string) {
 async function subscription(): Promise<PushSubscription> {
   const reg = (await navigator.serviceWorker.getRegistration()) ?? (await navigator.serviceWorker.register("/sw.js"));
   await navigator.serviceWorker.ready;
-  return (
-    (await reg.pushManager.getSubscription()) ??
-    (await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(VAPID_PUBLIC_KEY) }))
-  );
+  const existing = await reg.pushManager.getSubscription();
+  if (existing) return existing;
+  const key = await serverKey();
+  if (!key) throw new Error("server-off");
+  return reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyBytes(key) });
 }
 
 async function post(data: AppData, test = false) {
@@ -63,7 +69,7 @@ export async function enablePush(data: AppData): Promise<EnableResult> {
     if (!(await serverPushEnabled())) return "server-off";
     const r = await post(data, true);
     localStorage.setItem(FLAG, "1");
-    return r.test === "ok" ? "ok" : "error";
+    return r.test === "queued" ? "ok" : "error";
   } catch {
     return "error";
   }

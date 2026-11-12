@@ -25,6 +25,10 @@ npm run typecheck
 
 ## Notificaciones
 
-v1 usa recordatorios locales con la app abierta (y notificaciones del sistema si la PWA está instalada en iOS 16.4+).
-Para push con la app cerrada (v2) falta un backend que guarde suscripciones y envíe con claves VAPID; ver
-`subscribeToPush` en `src/lib/notify.ts` y el evento `push` en `public/sw.js`.
+- Con la app abierta: avisos locales (`src/components/useReminders.ts`).
+- Con la app cerrada: push. El móvil calcula sus próximos avisos (`src/lib/schedule.ts`) y los manda a
+  `api/push/sync`, que los guarda en Supabase (proyecto `june-avisos`). Cada minuto `pg_cron` llama a
+  `api/push/send`, que envía los que tocan con web-push. Esquema en `supabase/migrations/`.
+- Vercel solo necesita `SUPABASE_URL` y `SUPABASE_PUBLISHABLE_KEY` (públicas). Las claves VAPID y el secreto
+  del cron viven en `private.config` de Supabase y nunca salen de ahí salvo hacia la función de envío.
+- En iPhone los avisos solo funcionan con la app instalada en la pantalla de inicio (iOS 16.4+).

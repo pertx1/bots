@@ -1,18 +1,16 @@
 import webpush, { type PushSubscription } from "web-push";
 
 /**
- * Configuración (variables de entorno en Vercel):
- * - VAPID_PRIVATE_KEY: clave privada (la pública está en src/lib/push.ts)
- * - SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY: dónde se guardan los avisos
- * - CRON_SECRET: el mismo secreto guardado en private.config de Supabase
+ * Configuración (variables de entorno en Vercel, ninguna es secreta):
+ * - SUPABASE_URL y SUPABASE_PUBLISHABLE_KEY: dónde se guardan los avisos.
+ * Los secretos (claves VAPID y secreto del cron) viven solo en Supabase
+ * (private.config) y se piden con el secreto que manda el propio cron.
  */
-export const VAPID_PUBLIC_KEY = "BKhmtKCcqyWF0wGph2kokvi1_8zIBuO9hh9sqlE4NlbTPVcOfS3hVFJTd06dFHiki6vBJLU8IiedfDGWcWqftNw";
-
 export function pushConfigured(): boolean {
-  return !!(process.env.VAPID_PRIVATE_KEY && process.env.SUPABASE_URL && process.env.SUPABASE_PUBLISHABLE_KEY);
+  return !!(process.env.SUPABASE_URL && process.env.SUPABASE_PUBLISHABLE_KEY);
 }
 
-export async function rpc<T>(fn: string, args: Record<string, unknown>): Promise<T> {
+export async function rpc<T>(fn: string, args: Record<string, unknown> = {}): Promise<T> {
   const res = await fetch(`${process.env.SUPABASE_URL}/rest/v1/rpc/${fn}`, {
     method: "POST",
     headers: {
@@ -21,9 +19,14 @@ export async function rpc<T>(fn: string, args: Record<string, unknown>): Promise
     },
     body: JSON.stringify(args),
   });
-  if (!res.ok) throw new Error(`${fn}: ${res.status} ${await res.text()}`);
+  if (!res.ok) throw Object.assign(new Error(`${fn}: ${res.status} ${await res.text()}`), { status: res.status });
   const text = await res.text();
   return (text ? JSON.parse(text) : null) as T;
+}
+
+export interface VapidKeys {
+  publicKey: string;
+  privateKey: string;
 }
 
 export interface PushMessage {
@@ -33,16 +36,12 @@ export interface PushMessage {
 }
 
 /** Envía una notificación. Devuelve "gone" si el móvil ya no acepta avisos. */
-export async function sendPush(subscription: PushSubscription, msg: PushMessage): Promise<"ok" | "gone" | "error"> {
+export async function sendPush(subscription: PushSubscription, msg: PushMessage, keys: VapidKeys): Promise<"ok" | "gone" | "error"> {
   try {
     await webpush.sendNotification(subscription, JSON.stringify(msg), {
       TTL: 60 * 60,
       urgency: "high",
-      vapidDetails: {
-        subject: "https://june-empieza.vercel.app",
-        publicKey: VAPID_PUBLIC_KEY,
-        privateKey: process.env.VAPID_PRIVATE_KEY!,
-      },
+      vapidDetails: { subject: "https://june-empieza.vercel.app", ...keys },
     });
     return "ok";
   } catch (e) {

@@ -58,7 +58,7 @@ export function NotificationsCard({ compact = false }: { compact?: boolean }) {
               setBusy(true);
               const r = await enablePush(data);
               setBusy(false);
-              ui.toast(r === "ok" ? "Te he mandado una de prueba 📲" : "No ha llegado a salir. Prueba otra vez en un rato.", r === "ok" ? "mint" : "sun");
+              ui.toast(r === "ok" ? "En un minuto te llega una de prueba 📲" : "No ha llegado a salir. Prueba otra vez en un rato.", r === "ok" ? "mint" : "sun");
             }}
           >
             Probar
@@ -101,7 +101,7 @@ export function NotificationsCard({ compact = false }: { compact?: boolean }) {
           setBusy(false);
           if (r === "ok") {
             setOn(true);
-            ui.toast("¡Avisos activados! Te he mandado uno de prueba 🎉", "mint");
+            ui.toast("¡Avisos activados! En un minuto te llega uno de prueba 🎉", "mint");
           } else if (r === "denied") ui.toast("Sin permiso no puedo avisarte. Actívalo en Ajustes del iPhone → Notificaciones → June.", "sun");
           else if (r === "server-off") setServer(false);
           else ui.toast("Algo ha fallado. Prueba otra vez en un ratito.", "sun");
